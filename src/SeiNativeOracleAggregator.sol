@@ -3,22 +3,29 @@ pragma solidity ^0.8.25;
 
 import {IOracle} from "./interfaces/ISeiNativeOracle.sol";
 
-abstract contract SeiNativeOracleAggregator {
-    mapping(string denom => uint256 decimals) public decimals;
-
+library SeiNativeOracleAggregator {
     address constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
     IOracle constant ORACLE_CONTRACT = IOracle(ORACLE_PRECOMPILE_ADDRESS);
 
+    bytes32 internal constant USEI_DENOM_HASH = keccak256(bytes("usei"));
+    // bytes32 constant UATOM_DENOM_HASH = keccak256(bytes("uatom"));
+    // bytes32 constant UOSMO_DENOM_HASH = keccak256(bytes("uosmo"));
+    bytes32 internal constant UETH_DENOM_HASH = keccak256(bytes("ueth"));
+    bytes32 internal constant UBTC_DENOM_HASH = keccak256(bytes("ubtc"));
+    // bytes32 constant UUSDT_DENOM_HASH = keccak256(bytes("uusdt"));
+    // bytes32 constant UUSDC_DENOM_HASH = keccak256(bytes("uusdc"));
+
     error InvalidByte(bytes1 b);
 
-    constructor() {
-        decimals["usei"] = 18;
-        decimals["uatom"] = 6;
-        decimals["uosmo"] = 6;
-        decimals["ueth"] = 18;
-        decimals["ubtc"] = 8;
-        decimals["uusdt"] = 6;
-        decimals["uusdc"] = 6;
+    function decimals(string calldata denom) public pure returns (uint256) {
+        bytes32 denomHash = keccak256(bytes(denom));
+        if (denomHash == USEI_DENOM_HASH || denomHash == UETH_DENOM_HASH) {
+            return 18;
+        } else if (denomHash == UBTC_DENOM_HASH) {
+            return 8;
+        } else {
+            return 6;
+        }
     }
 
     function getExchangeRate(string calldata denom, bool applyDecimals)
@@ -37,7 +44,7 @@ abstract contract SeiNativeOracleAggregator {
 
     function convertExchangeRate(string memory exchangeRate, string calldata denom, bool applyDecimals)
         public
-        view
+        pure
         returns (uint256 rate, uint256 dec)
     {
         bytes memory e = bytes(exchangeRate);
@@ -53,7 +60,7 @@ abstract contract SeiNativeOracleAggregator {
                 fixedPointPos = i;
             }
         }
-        uint256 _decimals = decimals[denom];
+        uint256 _decimals = decimals(denom);
         // Sei oracle always returns 18 decimals of precision
         // if (length - fixedPointPos < _decimals) {
         //     o *= 10 ** (_decimals - (length - fixedPointPos) + 1);
