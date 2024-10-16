@@ -3,8 +3,7 @@ pragma solidity ^0.8.25;
 
 import {IOracle} from "./interfaces/ISeiNativeOracle.sol";
 
-contract SeiNativeOracleAggregator {
-
+abstract contract SeiNativeOracleAggregator {
     mapping(string denom => uint256 decimals) public decimals;
 
     address constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
@@ -22,22 +21,30 @@ contract SeiNativeOracleAggregator {
         decimals["uusdc"] = 6;
     }
 
-    function getExchangeRate(string memory denom) external view returns (uint256 rate, uint256 dec) {
+    function getExchangeRate(string calldata denom, bool applyDecimals)
+        external
+        view
+        returns (uint256 rate, uint256 dec)
+    {
         IOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
         uint256 length = data.length;
-        for(uint256 i; i < length; i++) {
+        for (uint256 i; i < length; i++) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
-                return (convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, denom), decimals[denom]);
+                return convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, denom, applyDecimals);
             }
         }
     }
 
-    function convertExchangeRate(string memory exchangeRate, string memory denom) public view returns (uint256) {
+    function convertExchangeRate(string memory exchangeRate, string calldata denom, bool applyDecimals)
+        public
+        view
+        returns (uint256 rate, uint256 dec)
+    {
         bytes memory e = bytes(exchangeRate);
         uint256 length = e.length;
         uint256 o;
         uint256 fixedPointPos;
-        for(uint256 i; i < length; i++) {
+        for (uint256 i; i < length; i++) {
             bytes1 b = e[i];
             if (b != 0x2E) {
                 if (b < 0x30 || b > 0x39) revert InvalidByte(b);
@@ -47,11 +54,16 @@ contract SeiNativeOracleAggregator {
             }
         }
         uint256 _decimals = decimals[denom];
-        if (length - fixedPointPos < _decimals) {
-            o *= 10 ** (_decimals - (length - fixedPointPos) + 1);
-        } else if (length - fixedPointPos > _decimals) {
+        // Sei oracle always returns 18 decimals of precision
+        // if (length - fixedPointPos < _decimals) {
+        //     o *= 10 ** (_decimals - (length - fixedPointPos) + 1);
+        // } else
+        //
+        // ApplyDecimals - users might want to leverage full precision
+        // in their calculations instead of rounding up to the token decimals.
+        if (length - fixedPointPos > _decimals && applyDecimals) {
             o /= 10 ** ((length - fixedPointPos - 1) - _decimals);
         }
-        return o;
+        return (o, applyDecimals ? _decimals : 18);
     }
 }
