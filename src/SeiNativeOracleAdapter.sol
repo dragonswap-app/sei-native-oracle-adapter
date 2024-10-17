@@ -51,7 +51,7 @@ library SeiNativeOracleAdapter {
     {
         ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
         uint256 length = data.length;
-        for (uint256 i; i < length; i++) {
+        for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
                 return convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, denom, applyDecimals);
             }
@@ -71,7 +71,7 @@ library SeiNativeOracleAdapter {
         uint256 length = data.length;
         rates = new uint256[](length);
         decs = new uint256[](length);
-        for (uint256 i; i < length; i++) {
+        for (uint256 i; i < length; ++i) {
             (rates[i], decs[i]) = convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
         }
     }
@@ -85,7 +85,7 @@ library SeiNativeOracleAdapter {
         uint256 length = e.length;
         uint256 o;
         uint256 fixedPointPos;
-        for (uint256 i; i < length; i++) {
+        for (uint256 i; i < length; ++i) {
             bytes1 b = e[i];
             if (b != 0x2E) {
                 if (b < 0x30 || b > 0x39) revert InvalidByte(b);
