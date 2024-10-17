@@ -1,8 +1,6 @@
-## Sei Native Oracle Library
-
-## Documentation
-
-https://book.getfoundry.sh/
+## Sei Native Oracle Adapter Library
+A library that enables an out-of-the-box utilization of the Sei Native Oracle though the Solidity smart-contracts.
+The Sei Native Oracle returns 18 decimal floating point numbers in string format (which are not directly usable in most cases), and this library helps you easily retrieve exchange rates in uint256 format with flexible decimals.
 
 ## Usage
 
@@ -16,42 +14,4 @@ $ forge build
 
 ```shell
 $ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
 ```
