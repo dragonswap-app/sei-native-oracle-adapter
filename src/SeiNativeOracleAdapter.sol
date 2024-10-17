@@ -4,20 +4,32 @@ pragma solidity ^0.8.25;
 import {IOracle} from "./interfaces/ISeiNativeOracle.sol";
 
 library SeiNativeOracleAdapter {
-    address constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
-    IOracle constant ORACLE_CONTRACT = IOracle(ORACLE_PRECOMPILE_ADDRESS);
+    address private constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
+    IOracle private constant ORACLE_CONTRACT = IOracle(ORACLE_PRECOMPILE_ADDRESS);
 
-    bytes32 internal constant USEI_DENOM_HASH = keccak256(bytes("usei"));
-    // bytes32 constant UATOM_DENOM_HASH = keccak256(bytes("uatom"));
-    // bytes32 constant UOSMO_DENOM_HASH = keccak256(bytes("uosmo"));
-    bytes32 internal constant UETH_DENOM_HASH = keccak256(bytes("ueth"));
-    bytes32 internal constant UBTC_DENOM_HASH = keccak256(bytes("ubtc"));
-    // bytes32 constant UUSDT_DENOM_HASH = keccak256(bytes("uusdt"));
-    // bytes32 constant UUSDC_DENOM_HASH = keccak256(bytes("uusdc"));
+    /// @dev Hashes used for assertions, also show which tokens are supported.
+    bytes32 private constant USEI_DENOM_HASH = keccak256(bytes("usei"));
+    bytes32 private constant UETH_DENOM_HASH = keccak256(bytes("ueth"));
+    bytes32 private constant UBTC_DENOM_HASH = keccak256(bytes("ubtc"));
+    // bytes32 private constant UUSDT_DENOM_HASH = keccak256(bytes("uusdt"));
+    // bytes32 private constant UUSDC_DENOM_HASH = keccak256(bytes("uusdc"));
+    // bytes32 private constant UATOM_DENOM_HASH = keccak256(bytes("uatom"));
+    // bytes32 private constant UOSMO_DENOM_HASH = keccak256(bytes("uosmo"));
 
     error InvalidByte(bytes1 b);
 
-    function decimals(string calldata denom) public pure returns (uint256) {
+    /**
+     * @dev Function to return decimals of a token supported by the Sei Native Oracle.
+     * $SEI  -> 18
+     * $ETH  -> 18
+     * $WBTC -> 8
+     * $USDT -> 6
+     * $USDC -> 6
+     * $ATOM -> 6
+     * $OSMO -> 6
+     * @param denom is supported token name represented as a lowercase string with 'u' as a prefix.
+     */
+    function decimals(string memory denom) public pure returns (uint256) {
         bytes32 denomHash = keccak256(bytes(denom));
         if (denomHash == USEI_DENOM_HASH || denomHash == UETH_DENOM_HASH) {
             return 18;
@@ -28,6 +40,10 @@ library SeiNativeOracleAdapter {
         }
     }
 
+    /**
+     * @dev Function to get a single token exchange rate from Sei Native Oracle represented in uint256 format.
+     * @param denom represents the token name
+     */
     function getExchangeRate(string calldata denom, bool applyDecimals)
         external
         view
@@ -42,7 +58,25 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function convertExchangeRate(string memory exchangeRate, string calldata denom, bool applyDecimals)
+    /**
+     * @dev Function to get all available exchange rates.
+     * @param applyDecimals describes if decimals should be cropped to fit the token specified decimals or if full precision should be kept.
+     */
+    function getExchangeRates(bool applyDecimals)
+        external
+        view
+        returns (uint256[] memory rates, uint256[] memory decs)
+    {
+        IOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
+        uint256 length = data.length;
+        rates = new uint256[](length);
+        decs = new uint256[](length);
+        for (uint256 i; i < length; i++) {
+            (rates[i], decs[i]) = convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
+        }
+    }
+
+    function convertExchangeRate(string memory exchangeRate, string memory denom, bool applyDecimals)
         public
         pure
         returns (uint256 rate, uint256 dec)

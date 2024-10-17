@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {AdapterConsumer} from "../src/test/AdapterConsumer.sol";
+import {AdapterConsumer} from "../src/mocks/AdapterConsumer.sol";
 
 contract SeiNativeOracleConsumerTest is Test {
     AdapterConsumer public adapterConsumer;
