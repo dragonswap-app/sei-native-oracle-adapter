@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
-import {IOracle} from "./interfaces/ISeiNativeOracle.sol";
+import {ISeiNativeOracle} from "./interfaces/ISeiNativeOracle.sol";
 
 library SeiNativeOracleAdapter {
     address private constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
-    IOracle private constant ORACLE_CONTRACT = IOracle(ORACLE_PRECOMPILE_ADDRESS);
+    ISeiNativeOracle private constant ORACLE_CONTRACT = ISeiNativeOracle(ORACLE_PRECOMPILE_ADDRESS);
 
     /// @dev Hashes used for assertions, also show which tokens are supported.
     bytes32 private constant USEI_DENOM_HASH = keccak256(bytes("usei"));
@@ -49,7 +49,7 @@ library SeiNativeOracleAdapter {
         view
         returns (uint256 rate, uint256 dec)
     {
-        IOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
+        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
         uint256 length = data.length;
         for (uint256 i; i < length; i++) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
@@ -67,7 +67,7 @@ library SeiNativeOracleAdapter {
         view
         returns (uint256[] memory rates, uint256[] memory decs)
     {
-        IOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
+        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
         uint256 length = data.length;
         rates = new uint256[](length);
         decs = new uint256[](length);
