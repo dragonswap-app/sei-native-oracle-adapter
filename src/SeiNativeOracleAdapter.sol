@@ -3,7 +3,7 @@ pragma solidity ^0.8.25;
 
 import {IOracle} from "./interfaces/ISeiNativeOracle.sol";
 
-library SeiNativeOracleAggregator {
+library SeiNativeOracleAdapter {
     address constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
     IOracle constant ORACLE_CONTRACT = IOracle(ORACLE_PRECOMPILE_ADDRESS);
 

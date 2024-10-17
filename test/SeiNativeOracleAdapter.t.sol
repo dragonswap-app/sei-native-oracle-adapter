@@ -2,13 +2,13 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {WrapperUser} from "../src/test/WrapperUser.sol";
+import {AdapterConsumer} from "../src/test/AdapterConsumer.sol";
 
-contract SeiNativeOracleAggregatorTest is Test {
-    WrapperUser public wrapperUser;
+contract SeiNativeOracleConsumerTest is Test {
+    AdapterConsumer public adapterConsumer;
 
     function setUp() public {
-        wrapperUser = new WrapperUser();
+        adapterConsumer = new AdapterConsumer();
     }
 
     function test_Increment() public {
