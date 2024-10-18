@@ -32,6 +32,14 @@ contract SeiNativeOracle is ISeiNativeOracle {
             lookbackSeconds: int64(10)
         });
         twaps.push(twap);
+
+        twap.denom = "ueth";
+        twap.twap = "2080.113235821123000000";
+        twaps.push(twap);
+
+        twap.denom = "ubtc";
+        twap.twap = "62057.772653314219000002";
+        twaps.push(twap);
     }
 
     function getExchangeRates() external view returns (DenomOracleExchangeRatePair[] memory _rates) {
