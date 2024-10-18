@@ -57,7 +57,7 @@ library SeiNativeOracleAdapter {
                 // Conversion of lastUpdate to uint256. This flow should change.
                 (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
                 // 5 block update tolerance.
-                if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
+                if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
                 uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
                 return convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
             }
@@ -96,14 +96,14 @@ library SeiNativeOracleAdapter {
             // Conversion of lastUpdate to uint256. This flow should change.
             (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
             // 5 block update tolerance.
-            if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
+            if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
             uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
             (rates[i], decs[i]) =
                 convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
         }
     }
 
-    function getOracleTwap(uint64 lookbackSeconds, bool applyDecimals)
+    function getOracleTwaps(uint64 lookbackSeconds, bool applyDecimals)
         external
         view
         returns (uint256[] memory twaps, uint256[] memory decs)
