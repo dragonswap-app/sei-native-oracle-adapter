@@ -55,10 +55,11 @@ library SeiNativeOracleAdapter {
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
                 // Conversion of lastUpdate to uint256. This flow should change.
-                (uint256 lastUpdate,) = convertExchangeRate(data[i].oracleExchangeRateVal.lastUpdate, "", false);
+                (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
                 // 5 block update tolerance.
                 if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
-                return convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, denom, applyDecimals);
+                uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
+                return convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
             }
         }
     }
@@ -72,7 +73,8 @@ library SeiNativeOracleAdapter {
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
-                return convertExchangeRate(data[i].twap, denom, applyDecimals);
+                uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
+                return convertToUint256(data[i].twap, _decimals);
             }
         }
     }
@@ -92,11 +94,12 @@ library SeiNativeOracleAdapter {
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
             // Conversion of lastUpdate to uint256. This flow should change.
-            (uint256 lastUpdate,) = convertExchangeRate(data[i].oracleExchangeRateVal.lastUpdate, "", false);
+            (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
             // 5 block update tolerance.
             if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
+            uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
             (rates[i], decs[i]) =
-                convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
+                convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
         }
     }
 
@@ -110,11 +113,12 @@ library SeiNativeOracleAdapter {
         twaps = new uint256[](length);
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
-            (twaps[i], decs[i]) = convertExchangeRate(data[i].twap, data[i].denom, applyDecimals);
+            uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
+            (twaps[i], decs[i]) = convertToUint256(data[i].twap, _decimals);
         }
     }
 
-    function convertExchangeRate(string memory exchangeRate, string memory denom, bool applyDecimals)
+    function convertToUint256(string memory exchangeRate, uint256 _decimals)
         public
         pure
         returns (uint256 rate, uint256 dec)
@@ -132,7 +136,6 @@ library SeiNativeOracleAdapter {
                 fixedPointPos = i;
             }
         }
-        uint256 _decimals = decimals(denom);
         // Sei oracle always returns 18 decimals of precision
         // if (length - fixedPointPos < _decimals) {
         //     o *= 10 ** (_decimals - (length - fixedPointPos) + 1);
@@ -140,9 +143,9 @@ library SeiNativeOracleAdapter {
         //
         // ApplyDecimals - users might want to leverage full precision
         // in their calculations instead of rounding up to the token decimals.
-        if (length - fixedPointPos > _decimals && applyDecimals) {
+        if (length - fixedPointPos > _decimals) {
             o /= 10 ** ((length - fixedPointPos - 1) - _decimals);
         }
-        return (o, applyDecimals ? _decimals : 18);
+        return (o, _decimals);
     }
 }
