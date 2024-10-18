@@ -58,6 +58,16 @@ library SeiNativeOracleAdapter {
         }
     }
 
+    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, bool applyDecimals) external view returns (uint256 twap, uint256 dec) {
+        ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
+        uint256 length = data.length;
+        for (uint256 i; i < length; ++i) {
+            if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
+                return convertExchangeRate(data[i].twap, denom, applyDecimals);
+            }
+        }
+    }
+
     /**
      * @dev Function to get all available exchange rates.
      * @param applyDecimals describes if decimals should be cropped to fit the token specified decimals or if full precision should be kept.
@@ -73,6 +83,16 @@ library SeiNativeOracleAdapter {
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
             (rates[i], decs[i]) = convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
+        }
+    }
+
+    function getOracleTwap(uint64 lookbackSeconds, bool applyDecimals) external view returns (uint256[] memory twaps, uint256[] memory decs) {
+        ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
+        uint256 length = data.length;
+        twaps = new uint256[](length);
+        decs = new uint256[](length);
+        for (uint256 i; i < length; ++i) {
+            (twaps[i], decs[i]) = convertExchangeRate(data[i].twap, data[i].denom, applyDecimals);
         }
     }
 
