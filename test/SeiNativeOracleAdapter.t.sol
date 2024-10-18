@@ -31,6 +31,18 @@ contract SeiNativeOracleConsumerTest is Test {
         }
     }
 
+    function test_getOracleTwap() public {
+        (uint256 twap,) = adapterConsumer.getOracleTwap("usei", 10, false);
+        console.log(twap);
+    }
+
+    function test_getOracleTwaps() public {
+        (uint256[] memory twaps,) = adapterConsumer.getOracleTwaps(10, false);
+        for (uint256 i; i < twaps.length; ++i) {
+            console.log(twaps[i]);
+        }
+    }
+
     function test_Increment() public {
         //aggregator.increment();
         //assertEq(aggregator.number(), 1);
