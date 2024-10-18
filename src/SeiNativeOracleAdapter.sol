@@ -17,6 +17,7 @@ library SeiNativeOracleAdapter {
     // bytes32 private constant UOSMO_DENOM_HASH = keccak256(bytes("uosmo"));
 
     error InvalidByte(bytes1 b);
+    error OutdatedExchangeRate();
 
     /**
      * @dev Function to return decimals of a token supported by the Sei Native Oracle.
@@ -53,6 +54,10 @@ library SeiNativeOracleAdapter {
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
+                // Conversion of lastUpdate to uint256. This flow should change.
+                (uint256 lastUpdate,) = convertExchangeRate(data[i].oracleExchangeRateVal.lastUpdate, "", false);
+                // 5 block update tolerance.
+                if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
                 return convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, denom, applyDecimals);
             }
         }
@@ -86,6 +91,10 @@ library SeiNativeOracleAdapter {
         rates = new uint256[](length);
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
+            // Conversion of lastUpdate to uint256. This flow should change.
+            (uint256 lastUpdate,) = convertExchangeRate(data[i].oracleExchangeRateVal.lastUpdate, "", false);
+            // 5 block update tolerance.
+            if (lastUpdate < block.number - 5) revert OutdatedExchangeRate();
             (rates[i], decs[i]) =
                 convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
         }
