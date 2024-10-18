@@ -20,13 +20,13 @@ contract SeiNativeOracleConsumerTest is Test {
     }
 
     function test_getExchangeRate() public {
-        (uint256 rate, ) = adapterConsumer.getExchangeRate("usei", false);
+        (uint256 rate,) = adapterConsumer.getExchangeRate("usei", false);
         console.log(rate);
     }
 
     function test_getExchangeRates() public {
-        (uint256[] memory rates, ) = adapterConsumer.getExchangeRates(false);
-        for (uint i; i < rates.length; ++i) {
+        (uint256[] memory rates,) = adapterConsumer.getExchangeRates(false);
+        for (uint256 i; i < rates.length; ++i) {
             console.log(rates[i]);
         }
     }

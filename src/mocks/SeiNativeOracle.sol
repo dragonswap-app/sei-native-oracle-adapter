@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import {ISeiNativeOracle} from "../interfaces/ISeiNativeOracle.sol";
 
 contract SeiNativeOracle is ISeiNativeOracle {
-
     DenomOracleExchangeRatePair[] public rates;
 
     function initialize() external {
@@ -32,7 +31,5 @@ contract SeiNativeOracle is ISeiNativeOracle {
         _rates = rates;
     }
 
-    function getOracleTwaps(uint64 lookback_seconds) external view returns (OracleTwap[] memory twaps) {
-
-    }
+    function getOracleTwaps(uint64 lookback_seconds) external view returns (OracleTwap[] memory twaps) {}
 }

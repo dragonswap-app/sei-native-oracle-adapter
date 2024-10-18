@@ -58,7 +58,11 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, bool applyDecimals) external view returns (uint256 twap, uint256 dec) {
+    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, bool applyDecimals)
+        external
+        view
+        returns (uint256 twap, uint256 dec)
+    {
         ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
@@ -82,11 +86,16 @@ library SeiNativeOracleAdapter {
         rates = new uint256[](length);
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
-            (rates[i], decs[i]) = convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
+            (rates[i], decs[i]) =
+                convertExchangeRate(data[i].oracleExchangeRateVal.exchangeRate, data[i].denom, applyDecimals);
         }
     }
 
-    function getOracleTwap(uint64 lookbackSeconds, bool applyDecimals) external view returns (uint256[] memory twaps, uint256[] memory decs) {
+    function getOracleTwap(uint64 lookbackSeconds, bool applyDecimals)
+        external
+        view
+        returns (uint256[] memory twaps, uint256[] memory decs)
+    {
         ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         twaps = new uint256[](length);

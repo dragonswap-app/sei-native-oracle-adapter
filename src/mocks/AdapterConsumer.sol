@@ -12,12 +12,7 @@ contract AdapterConsumer {
         return SeiNativeOracleAdapter.getExchangeRate(denom, applyDecimals);
     }
 
-    function getExchangeRates(bool applyDecimals)
-        external
-        view
-        returns (uint256[] memory rate, uint256[] memory dec)
-    {
+    function getExchangeRates(bool applyDecimals) external view returns (uint256[] memory rate, uint256[] memory dec) {
         return SeiNativeOracleAdapter.getExchangeRates(applyDecimals);
     }
-
 }
