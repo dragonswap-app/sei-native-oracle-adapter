@@ -1,0 +1,4 @@
+SeiNativeOracleConsumerTest:testFuzz_SetNumber(uint256) (runs: 256, μ: 279, ~: 279)
+SeiNativeOracleConsumerTest:test_Increment() (gas: 257)
+SeiNativeOracleConsumerTest:test_getExchangeRate() (gas: 44527)
+SeiNativeOracleConsumerTest:test_getExchangeRates() (gas: 59435)

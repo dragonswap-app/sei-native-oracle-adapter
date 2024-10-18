@@ -9,10 +9,14 @@ contract SeiNativeOracleConsumerTest is Test {
     AdapterConsumer public adapterConsumer;
     SeiNativeOracle public seiNativeOracle;
 
+    address public constant ORACLE_ADDRESS = 0x0000000000000000000000000000000000001008;
+
     function setUp() public {
         adapterConsumer = new AdapterConsumer();
         seiNativeOracle = new SeiNativeOracle();
-        vm.etch(0x0000000000000000000000000000000000001008, address(seiNativeOracle).code);
+        vm.etch(ORACLE_ADDRESS, address(seiNativeOracle).code);
+        seiNativeOracle = SeiNativeOracle(ORACLE_ADDRESS);
+        seiNativeOracle.initialize();
     }
 
     function test_getExchangeRate() public {
