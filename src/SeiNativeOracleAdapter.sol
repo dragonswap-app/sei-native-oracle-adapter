@@ -7,45 +7,14 @@ library SeiNativeOracleAdapter {
     address private constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
     ISeiNativeOracle private constant ORACLE_CONTRACT = ISeiNativeOracle(ORACLE_PRECOMPILE_ADDRESS);
 
-    /// @dev Hashes used for assertions, also show which tokens are supported.
-    bytes32 private constant USEI_DENOM_HASH = keccak256(bytes("usei"));
-    bytes32 private constant UETH_DENOM_HASH = keccak256(bytes("ueth"));
-    bytes32 private constant UBTC_DENOM_HASH = keccak256(bytes("ubtc"));
-    // bytes32 private constant UUSDT_DENOM_HASH = keccak256(bytes("uusdt"));
-    // bytes32 private constant UUSDC_DENOM_HASH = keccak256(bytes("uusdc"));
-    // bytes32 private constant UATOM_DENOM_HASH = keccak256(bytes("uatom"));
-    // bytes32 private constant UOSMO_DENOM_HASH = keccak256(bytes("uosmo"));
-
     error InvalidByte(bytes1 b);
     error OutdatedExchangeRate();
-
-    /**
-     * @dev Function to return decimals of a token supported by the Sei Native Oracle.
-     * $SEI  -> 18
-     * $ETH  -> 18
-     * $WBTC -> 8
-     * $USDT -> 6
-     * $USDC -> 6
-     * $ATOM -> 6
-     * $OSMO -> 6
-     * @param denom is supported token name represented as a lowercase string with 'u' as a prefix.
-     */
-    function decimals(string memory denom) public pure returns (uint256) {
-        bytes32 denomHash = keccak256(bytes(denom));
-        if (denomHash == USEI_DENOM_HASH || denomHash == UETH_DENOM_HASH) {
-            return 18;
-        } else if (denomHash == UBTC_DENOM_HASH) {
-            return 8;
-        } else {
-            return 6;
-        }
-    }
 
     /**
      * @dev Function to get a single token exchange rate from Sei Native Oracle represented in uint256 format.
      * @param denom represents the token name
      */
-    function getExchangeRate(string calldata denom, bool applyDecimals)
+    function getExchangeRate(string calldata denom, uint256 decimals)
         external
         view
         returns (uint256 rate, uint256 dec)
@@ -55,16 +24,16 @@ library SeiNativeOracleAdapter {
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
                 // Conversion of lastUpdate to uint256. This flow should change.
-                (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
+                (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18 // TODO: Change this.
+                );
                 // 5 block update tolerance.
                 if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
-                uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
-                return convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
+                return convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, decimals);
             }
         }
     }
 
-    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, bool applyDecimals)
+    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, uint256 decimals)
         external
         view
         returns (uint256 twap, uint256 dec)
@@ -73,17 +42,15 @@ library SeiNativeOracleAdapter {
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
-                uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
-                return convertToUint256(data[i].twap, _decimals);
+                return convertToUint256(data[i].twap, decimals);
             }
         }
     }
 
     /**
      * @dev Function to get all available exchange rates.
-     * @param applyDecimals describes if decimals should be cropped to fit the token specified decimals or if full precision should be kept.
      */
-    function getExchangeRates(bool applyDecimals)
+    function getExchangeRates(uint256 decimals)
         external
         view
         returns (uint256[] memory rates, uint256[] memory decs)
@@ -97,13 +64,12 @@ library SeiNativeOracleAdapter {
             (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
             // 5 block update tolerance.
             if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
-            uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
             (rates[i], decs[i]) =
-                convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, _decimals);
+                convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, decimals);
         }
     }
 
-    function getOracleTwaps(uint64 lookbackSeconds, bool applyDecimals)
+    function getOracleTwaps(uint64 lookbackSeconds, uint256 decimals)
         external
         view
         returns (uint256[] memory twaps, uint256[] memory decs)
@@ -113,16 +79,16 @@ library SeiNativeOracleAdapter {
         twaps = new uint256[](length);
         decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
-            uint256 _decimals = applyDecimals ? decimals(data[i].denom) : 18;
-            (twaps[i], decs[i]) = convertToUint256(data[i].twap, _decimals);
+            (twaps[i], decs[i]) = convertToUint256(data[i].twap, decimals);
         }
     }
 
-    function convertToUint256(string memory exchangeRate, uint256 _decimals)
+    function convertToUint256(string memory exchangeRate, uint256 decimals)
         public
         pure
         returns (uint256 rate, uint256 dec)
     {
+        decimals = decimals == 0 ? 18 : decimals;
         bytes memory e = bytes(exchangeRate);
         uint256 length = e.length;
         uint256 o;
@@ -143,9 +109,9 @@ library SeiNativeOracleAdapter {
         //
         // ApplyDecimals - users might want to leverage full precision
         // in their calculations instead of rounding up to the token decimals.
-        if (length - fixedPointPos > _decimals) {
-            o /= 10 ** ((length - fixedPointPos - 1) - _decimals);
+        if (length - fixedPointPos > decimals) {
+            o /= 10 ** ((length - fixedPointPos - 1) - decimals);
         }
-        return (o, _decimals);
+        return (o, decimals);
     }
 }
