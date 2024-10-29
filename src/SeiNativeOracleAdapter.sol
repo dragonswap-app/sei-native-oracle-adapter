@@ -15,7 +15,7 @@ library SeiNativeOracleAdapter {
      * @dev Function to get a single token exchange rate from Sei Native Oracle represented in uint256 format.
      * @param denom represents the token name
      */
-    function getExchangeRate(string calldata denom) external view returns (uint256 rate) {
+    function getExchangeRate(string calldata denom) internal view returns (uint256 rate) {
         ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
@@ -35,7 +35,7 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function getOracleTwap(string calldata denom, uint64 lookbackSeconds) external view returns (uint256 twap) {
+    function getOracleTwap(string calldata denom, uint64 lookbackSeconds) internal view returns (uint256 twap) {
         ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
@@ -48,7 +48,7 @@ library SeiNativeOracleAdapter {
     /**
      * @dev Function to get all available exchange rates.
      */
-    function getExchangeRates() external view returns (uint256[] memory rates) {
+    function getExchangeRates() internal view returns (uint256[] memory rates) {
         ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         uint256 length = data.length;
         rates = new uint256[](length);
@@ -67,7 +67,7 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function getOracleTwaps(uint64 lookbackSeconds) external view returns (uint256[] memory twaps) {
+    function getOracleTwaps(uint64 lookbackSeconds) internal view returns (uint256[] memory twaps) {
         ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         twaps = new uint256[](length);
@@ -76,7 +76,7 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function convertToUint256(bytes memory exchangeRateBytes) public pure returns (uint256 exchangeRateUint256) {
+    function convertToUint256(bytes memory exchangeRateBytes) internal pure returns (uint256 exchangeRateUint256) {
         uint256 length = exchangeRateBytes.length;
         for (uint256 i; i < length; ++i) {
             bytes1 b = exchangeRateBytes[i];
@@ -85,5 +85,15 @@ library SeiNativeOracleAdapter {
                 exchangeRateUint256 = exchangeRateUint256 * 10 + (uint8(b) - uint8(0x30));
             }
         }
+    }
+
+    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal (uint256) {
+        if (number < 10**fromDecimals) revert();
+        if (toDecimals > fromDecimals) {
+            return number * 10**(toDecimals - fromDecimals);
+        } else if (fromDecimals > toDecimals) {
+            return number / 10**(fromDecimals - toDecimals);
+        }
+        return number;
     }
 }
