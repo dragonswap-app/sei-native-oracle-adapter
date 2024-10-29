@@ -87,7 +87,7 @@ library SeiNativeOracleAdapter {
         }
     }
 
-    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal (uint256) {
+    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal returns (uint256) {
         if (number < 10**fromDecimals) revert();
         if (toDecimals > fromDecimals) {
             return number * 10**(toDecimals - fromDecimals);
