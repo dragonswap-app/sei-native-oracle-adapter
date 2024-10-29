@@ -20,24 +20,24 @@ contract SeiNativeOracleConsumerTest is Test {
     }
 
     function test_getExchangeRate() public {
-        (uint256 rate,) = adapterConsumer.getExchangeRate("usei", uint256(18));
+        uint256 rate = adapterConsumer.getExchangeRate("usei");
         console.log(rate);
     }
 
     function test_getExchangeRates() public {
-        (uint256[] memory rates,) = adapterConsumer.getExchangeRates(uint256(18));
+        uint256[] memory rates = adapterConsumer.getExchangeRates();
         for (uint256 i; i < rates.length; ++i) {
             console.log(rates[i]);
         }
     }
 
     function test_getOracleTwap() public {
-        (uint256 twap,) = adapterConsumer.getOracleTwap("usei", 10, uint256(18));
+        uint256 twap = adapterConsumer.getOracleTwap("usei", 10);
         console.log(twap);
     }
 
     function test_getOracleTwaps() public {
-        (uint256[] memory twaps,) = adapterConsumer.getOracleTwaps(10, uint256(18));
+        uint256[] memory twaps = adapterConsumer.getOracleTwaps(10);
         for (uint256 i; i < twaps.length; ++i) {
             console.log(twaps[i]);
         }

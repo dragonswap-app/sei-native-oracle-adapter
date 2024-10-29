@@ -4,8 +4,9 @@ pragma solidity ^0.8.28;
 import {ISeiNativeOracle} from "./interfaces/ISeiNativeOracle.sol";
 
 library SeiNativeOracleAdapter {
-    address private constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
-    ISeiNativeOracle private constant ORACLE_CONTRACT = ISeiNativeOracle(ORACLE_PRECOMPILE_ADDRESS);
+    address internal constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
+    ISeiNativeOracle internal constant NATIVE_ORACLE = ISeiNativeOracle(ORACLE_PRECOMPILE_ADDRESS);
+    uint256 internal constant ORACLE_PRECISION = 18; // decimals
 
     error InvalidByte(bytes1 b);
     error OutdatedExchangeRate();
@@ -14,35 +15,32 @@ library SeiNativeOracleAdapter {
      * @dev Function to get a single token exchange rate from Sei Native Oracle represented in uint256 format.
      * @param denom represents the token name
      */
-    function getExchangeRate(string calldata denom, uint256 decimals)
-        external
-        view
-        returns (uint256 rate, uint256 dec)
-    {
-        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
+    function getExchangeRate(string calldata denom) external view returns (uint256 rate) {
+        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
-            if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
+            ISeiNativeOracle.DenomOracleExchangeRatePair memory pair = data[i];
+            if (keccak256(bytes(pair.denom)) == keccak256(bytes(denom))) {
                 // Conversion of lastUpdate to uint256. This flow should change.
-                (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18 // TODO: Change this.
-                );
-                // 5 block update tolerance.
-                if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
-                return convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, decimals);
+                uint256 lastUpdate = convertToUint256(bytes(pair.oracleExchangeRateVal.lastUpdate));
+                // 5 block / 10 seconds update tolerance.
+                if (
+                    lastUpdate + 5 < block.number
+                        || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + 10 < block.timestamp
+                ) {
+                    revert OutdatedExchangeRate();
+                }
+                return convertToUint256(bytes(pair.oracleExchangeRateVal.exchangeRate));
             }
         }
     }
 
-    function getOracleTwap(string calldata denom, uint64 lookbackSeconds, uint256 decimals)
-        external
-        view
-        returns (uint256 twap, uint256 dec)
-    {
-        ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
+    function getOracleTwap(string calldata denom, uint64 lookbackSeconds) external view returns (uint256 twap) {
+        ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         for (uint256 i; i < length; ++i) {
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
-                return convertToUint256(data[i].twap, decimals);
+                return convertToUint256(bytes(data[i].twap));
             }
         }
     }
@@ -50,68 +48,42 @@ library SeiNativeOracleAdapter {
     /**
      * @dev Function to get all available exchange rates.
      */
-    function getExchangeRates(uint256 decimals)
-        external
-        view
-        returns (uint256[] memory rates, uint256[] memory decs)
-    {
-        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = ORACLE_CONTRACT.getExchangeRates();
+    function getExchangeRates() external view returns (uint256[] memory rates) {
+        ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         uint256 length = data.length;
         rates = new uint256[](length);
-        decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
+            ISeiNativeOracle.DenomOracleExchangeRatePair memory pair = data[i];
             // Conversion of lastUpdate to uint256. This flow should change.
-            (uint256 lastUpdate,) = convertToUint256(data[i].oracleExchangeRateVal.lastUpdate, 18);
-            // 5 block update tolerance.
-            if (lastUpdate + 5 < block.number) revert OutdatedExchangeRate();
-            (rates[i], decs[i]) =
-                convertToUint256(data[i].oracleExchangeRateVal.exchangeRate, decimals);
+            uint256 lastUpdate = convertToUint256(bytes(pair.oracleExchangeRateVal.lastUpdate));
+            // 5 block / 10 seconds update tolerance.
+            if (
+                lastUpdate + 5 < block.number
+                    || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + 10 < block.timestamp
+            ) {
+                revert OutdatedExchangeRate();
+            }
+            rates[i] = convertToUint256(bytes(pair.oracleExchangeRateVal.exchangeRate));
         }
     }
 
-    function getOracleTwaps(uint64 lookbackSeconds, uint256 decimals)
-        external
-        view
-        returns (uint256[] memory twaps, uint256[] memory decs)
-    {
-        ISeiNativeOracle.OracleTwap[] memory data = ORACLE_CONTRACT.getOracleTwaps(lookbackSeconds);
+    function getOracleTwaps(uint64 lookbackSeconds) external view returns (uint256[] memory twaps) {
+        ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         uint256 length = data.length;
         twaps = new uint256[](length);
-        decs = new uint256[](length);
         for (uint256 i; i < length; ++i) {
-            (twaps[i], decs[i]) = convertToUint256(data[i].twap, decimals);
+            twaps[i] = convertToUint256(bytes(data[i].twap));
         }
     }
 
-    function convertToUint256(string memory exchangeRate, uint256 decimals)
-        public
-        pure
-        returns (uint256 rate, uint256 dec)
-    {
-        decimals = decimals == 0 ? 18 : decimals;
-        bytes memory e = bytes(exchangeRate);
-        uint256 length = e.length;
-        uint256 o;
-        uint256 fixedPointPos;
+    function convertToUint256(bytes memory exchangeRateBytes) public pure returns (uint256 exchangeRateUint256) {
+        uint256 length = exchangeRateBytes.length;
         for (uint256 i; i < length; ++i) {
-            bytes1 b = e[i];
+            bytes1 b = exchangeRateBytes[i];
             if (b != 0x2E) {
                 if (b < 0x30 || b > 0x39) revert InvalidByte(b);
-                o = o * 10 + (uint8(b) - uint8(0x30));
-            } else {
-                fixedPointPos = i;
+                exchangeRateUint256 = exchangeRateUint256 * 10 + (uint8(b) - uint8(0x30));
             }
         }
-        // Sei oracle always returns 18 decimals of precision
-        // if (length - fixedPointPos < _decimals) {
-        //     o *= 10 ** (_decimals - (length - fixedPointPos) + 1);
-        // } else
-        //
-        // ApplyDecimals - users might want to leverage full precision
-        // in their calculations instead of rounding up to the token decimals.
-        if (length - fixedPointPos > decimals) {
-            o /= 10 ** ((length - fixedPointPos - 1) - decimals);
-        }
-        return (o, decimals);
     }
 }
