@@ -26,11 +26,7 @@ contract SeiNativeOracle is ISeiNativeOracle {
         rate.oracleExchangeRateVal.exchangeRate = "65179.895227000000000000";
         rates.push(rate);
 
-        OracleTwap memory twap = OracleTwap({
-            denom: "usei",
-            twap: "17.000225790000000000",
-            lookbackSeconds: int64(10)
-        });
+        OracleTwap memory twap = OracleTwap({denom: "usei", twap: "17.000225790000000000", lookbackSeconds: int64(10)});
         twaps.push(twap);
 
         twap.denom = "ueth";
@@ -46,7 +42,7 @@ contract SeiNativeOracle is ISeiNativeOracle {
         _rates = rates;
     }
 
-    function getOracleTwaps(uint64 /*lookback_seconds*/) external view returns (OracleTwap[] memory _twaps) {
+    function getOracleTwaps(uint64 /*lookback_seconds*/ ) external view returns (OracleTwap[] memory _twaps) {
         _twaps = twaps;
     }
 }
