@@ -117,23 +117,42 @@ library SeiNativeOracleAdapter {
     }
     // TODO: Return twaps with denoms.
 
+    /**
+     * @dev Function to convert exchange rate into uint256 format.
+     * @param exchangeRateBytes is exchange rate in bytes dynamic format.
+     * @return exchangeRateUint256 is exchange rate in uint256 static format.
+     */
     function convertToUint256(bytes memory exchangeRateBytes) internal pure returns (uint256 exchangeRateUint256) {
+        // Gas opt.
         uint256 length = exchangeRateBytes.length;
         for (uint256 i; i < length; ++i) {
+            // Gas opt.
             bytes1 b = exchangeRateBytes[i];
+            // Check if current byte contains '.'.
             if (b != 0x2E) {
+                // Check if current byte takes place in the number characters range.
                 if (b < 0x30 || b > 0x39) revert InvalidByte(b);
+                // Append the number to the exchange rate value.
                 exchangeRateUint256 = exchangeRateUint256 * 10 + (uint8(b) - uint8(0x30));
             }
         }
     }
 
-    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal returns (uint256) {
+    /**
+     * @dev Function to trim or extend decimals. Meant to be used with converted exchange rate.
+     * @param number is the number whichs decimals are to be changed. Usually exchange rate, but can be anything else.
+     * @param fromDecimals is the amount of decimals present in the current representation of the 'number'.
+     * @param toDecimals is the amount of decimals to be present in the modified representation of the 'number'.
+     */
+    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal pure returns (uint256) {
+        // Check if number value representation contains enough decimals. Might remove this check.
         if (number < 10**fromDecimals) revert();
         if (toDecimals > fromDecimals) {
-            return number * 10**(toDecimals - fromDecimals);
+            // Append zeroes.
+            number *= 10**(toDecimals - fromDecimals);
         } else if (fromDecimals > toDecimals) {
-            return number / 10**(fromDecimals - toDecimals);
+            // Trim decimals.
+            number /= 10**(fromDecimals - toDecimals);
         }
         return number;
     }
