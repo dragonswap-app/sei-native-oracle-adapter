@@ -108,7 +108,11 @@ library SeiNativeOracleAdapter {
      * @return twaps are all available time weighed average prices for a given amount of lookback seconds, converted to uint256.
      * @return denoms are denoms of all the available tokens/twaps.
      */
-    function getOracleTwaps(uint64 lookbackSeconds) internal view returns (uint256[] memory twaps, string[] memory denoms) {
+    function getOracleTwaps(uint64 lookbackSeconds)
+        internal
+        view
+        returns (uint256[] memory twaps, string[] memory denoms)
+    {
         // Retrieve twap values in the default/string format from the native oracle.
         ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         // Gas opt.
@@ -157,10 +161,10 @@ library SeiNativeOracleAdapter {
         // Compare decimals.
         if (toDecimals > fromDecimals) {
             // Append zeroes.
-            number *= 10**(toDecimals - fromDecimals);
+            number *= 10 ** (toDecimals - fromDecimals);
         } else if (fromDecimals > toDecimals) {
             // Trim decimals.
-            number /= 10**(fromDecimals - toDecimals);
+            number /= 10 ** (fromDecimals - toDecimals);
         }
         return number;
     }

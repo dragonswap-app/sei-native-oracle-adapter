@@ -16,7 +16,11 @@ contract AdapterConsumer {
         return SeiNativeOracleAdapter.getOracleTwap(denom, lookbackSeconds);
     }
 
-    function getOracleTwaps(uint64 lookbackSeconds) external view returns (uint256[] memory rates, string[] memory denoms) {
+    function getOracleTwaps(uint64 lookbackSeconds)
+        external
+        view
+        returns (uint256[] memory rates, string[] memory denoms)
+    {
         return SeiNativeOracleAdapter.getOracleTwaps(lookbackSeconds);
     }
 
