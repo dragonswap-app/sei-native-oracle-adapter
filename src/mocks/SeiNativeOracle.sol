@@ -1,8 +1,12 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.28;
 
 import {ISeiNativeOracle} from "../interfaces/ISeiNativeOracle.sol";
 
+/**
+ * THIS IS A MOCK CONTRACT THAT USES UNAUDITED CODE.
+ * DO NOT USE THIS CODE IN PRODUCTION.
+ */
 contract SeiNativeOracle is ISeiNativeOracle {
 
     function getExchangeRates() external view returns (DenomOracleExchangeRatePair[] memory rates) {

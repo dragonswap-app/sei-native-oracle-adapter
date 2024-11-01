@@ -1,8 +1,12 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.28;
 
 import {SeiNativeOracleAdapter} from "../SeiNativeOracleAdapter.sol";
 
+/**
+ * THIS IS A MOCK CONTRACT THAT USES UNAUDITED CODE.
+ * DO NOT USE THIS CODE IN PRODUCTION.
+ */
 contract AdapterConsumer {
     function getExchangeRate(string calldata denom) external view returns (uint256 rate) {
         return SeiNativeOracleAdapter.getExchangeRate(denom);
