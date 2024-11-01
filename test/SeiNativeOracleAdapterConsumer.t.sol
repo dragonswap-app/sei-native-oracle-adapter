@@ -5,7 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {AdapterConsumer} from "../src/mocks/AdapterConsumer.sol";
 import {SeiNativeOracle} from "../src/mocks/SeiNativeOracle.sol";
 
-contract SeiNativeOracleConsumerTest is Test {
+contract SeiNativeOracleAdapterConsumerTest is Test {
     AdapterConsumer public adapterConsumer;
     SeiNativeOracle public seiNativeOracle;
 
@@ -25,7 +25,7 @@ contract SeiNativeOracleConsumerTest is Test {
     }
 
     function test_getExchangeRates() public {
-        (string[] memory denoms, uint256[] memory rates) = adapterConsumer.getExchangeRates();
+        (uint256[] memory rates, string[] memory denoms) = adapterConsumer.getExchangeRates();
         for (uint256 i; i < rates.length; ++i) {
             console.log(rates[i]);
         }
@@ -37,7 +37,7 @@ contract SeiNativeOracleConsumerTest is Test {
     }
 
     function test_getOracleTwaps() public {
-        (string[] memory denoms, uint256[] memory twaps) = adapterConsumer.getOracleTwaps(10);
+        (uint256[] memory twaps, string[] memory denoms) = adapterConsumer.getOracleTwaps(10);
         for (uint256 i; i < twaps.length; ++i) {
             console.log(twaps[i]);
         }
