@@ -72,16 +72,17 @@ library SeiNativeOracleAdapter {
 
     /**
      * @dev Function to get all available exchange rates.
+     * @return rates are the latest exchange rates available, converted to uint256.
      * @return denoms are denoms of all the available tokens/exchange rates.
-     * @param rates are the latest exchange rates available, converted to uint256.
      */
-    function getExchangeRates() internal view returns (string[] memory denoms, uint256[] memory rates) {
+    function getExchangeRates() internal view returns (uint256[] memory rates, string[] memory denoms) {
         // Retrieve exchange rates in default/string format from the native oracle.
         ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         // Gas opt.
         uint256 length = data.length;
-        // Initialize rates array.
+        // Initialize arrays.
         rates = new uint256[](length);
+        denoms = new string[](length);
         for (uint256 i; i < length; ++i) {
             // Gas opt.
             ISeiNativeOracle.DenomOracleExchangeRatePair memory pair = data[i];
@@ -95,28 +96,29 @@ library SeiNativeOracleAdapter {
                 revert OutdatedExchangeRate();
             }
             // Assign rates and denoms.
-            denoms[i] = pair.denom;
             rates[i] = convertToUint256(bytes(pair.oracleExchangeRateVal.exchangeRate));
+            denoms[i] = pair.denom;
         }
     }
 
     /**
      * @dev Function to get twaps for all available tokens/denoms and given amount of lookback seconds.
-     * @return denoms are denoms of all the available tokens/twaps.
      * @return twaps are all available time weighed average prices for a given amount of lookback seconds, converted to uint256.
+     * @return denoms are denoms of all the available tokens/twaps.
      */
-    function getOracleTwaps(uint64 lookbackSeconds) internal view returns (string[] memory denoms, uint256[] memory twaps) {
+    function getOracleTwaps(uint64 lookbackSeconds) internal view returns (uint256[] memory twaps, string[] memory denoms) {
         // Retrieve twap values in the default/string format from the native oracle.
         ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         // Gas opt.
         uint256 length = data.length;
-        // Initialize twaps array.
+        // Initialize arrays.
         twaps = new uint256[](length);
+        denoms = new string[](length);
         for (uint256 i; i < length; ++i) {
             ISeiNativeOracle.OracleTwap memory twap = data[i];
             // Assign twaps and denoms.
-            denoms[i] = twap.denom;
             twaps[i] = convertToUint256(bytes(twap.twap));
+            denoms[i] = twap.denom;
         }
     }
 
