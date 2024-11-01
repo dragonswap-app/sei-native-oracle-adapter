@@ -30,6 +30,7 @@ The Sei Native Oracle returns 18 decimal fixed point numbers in a `string` forma
 ### changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals)
 - Function that changes decimals on a provided number by either appending zeroes to it or trimming it for a specified number of decimals.
 - This function is not directly used in any of the existing flows, but it is made to let consumers manually adapt decimals on need.
+- Can utilize the informative ORACLE_PRECISION constant.
 - Returns: `number` -> number with modified decimals
  
 *_Rates/Prices are represented in USD value_

@@ -19,4 +19,8 @@ contract AdapterConsumer {
     function getOracleTwaps(uint64 lookbackSeconds) external view returns (uint256[] memory rates, string[] memory denoms) {
         return SeiNativeOracleAdapter.getOracleTwaps(lookbackSeconds);
     }
+
+    function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) external pure returns (uint256) {
+        return SeiNativeOracleAdapter.changeDecimals(number, fromDecimals, toDecimals);
+    }
 }

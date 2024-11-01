@@ -22,6 +22,8 @@ contract SeiNativeOracleAdapterConsumerTest is Test {
     function test_getExchangeRate() public {
         uint256 rate = adapterConsumer.getExchangeRate("usei");
         console.log(rate);
+        console.log(adapterConsumer.changeDecimals(rate, 18, 16));
+        console.log(adapterConsumer.changeDecimals(rate, 18, 20));
     }
 
     function test_getExchangeRates() public {
@@ -41,15 +43,5 @@ contract SeiNativeOracleAdapterConsumerTest is Test {
         for (uint256 i; i < twaps.length; ++i) {
             console.log(twaps[i]);
         }
-    }
-
-    function test_Increment() public {
-        //aggregator.increment();
-        //assertEq(aggregator.number(), 1);
-    }
-
-    function testFuzz_SetNumber(uint256 x) public {
-        //counter.setNumber(x);
-        //assertEq(counter.number(), x);
     }
 }
