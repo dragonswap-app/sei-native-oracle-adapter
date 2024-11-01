@@ -1,6 +1,6 @@
-## Sei Native Oracle Adapter Library
+# Sei Native Oracle Adapter Library
 A library that enables an out-of-the-box utilization of the Sei Native Oracle though the Solidity smart-contracts.
-The Sei Native Oracle returns 18 decimal floating point numbers in string format (which are not directly usable in most cases), and this library helps you easily retrieve exchange rates in uint256 format with flexible decimals.
+The Sei Native Oracle returns 18 decimal fixed point numbers in a `string` format (which is usually not directly usable), and this library helps you easily retrieve exchange rates in `uint256` format with a manageable amount decimals.
 
 ## Functionalities
 
@@ -29,6 +29,7 @@ The Sei Native Oracle returns 18 decimal floating point numbers in string format
 
 ### `changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals)`
 - Function that changes decimals on a provided number by either appending zeroes to it or trimming it for a specified number of decimals.
+- This function is not directly used in any of the existing flows, but it is made to let consumers manually adapt decimals on need.
 - Returns: `number` -> number with modified decimals
  
 *_Rates/Prices are represented in USD value_
