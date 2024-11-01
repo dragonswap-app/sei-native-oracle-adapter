@@ -55,6 +55,7 @@ library SeiNativeOracleAdapter {
      * @param lookbackSeconds represents number of seconds since the current moment, meaning time period is from `block.timestamp` to `block.timestamp - lookbackSeconds`
      * @return twap is time weighet average price for the given token and time period.
      * @dev Function will return zero in case of an unsupported token or missing feed.
+     * @dev Output is returned in the optimized order.
      */
     function getOracleTwap(string calldata denom, uint64 lookbackSeconds) internal view returns (uint256 twap) {
         // Retrieve twap values in the default/string format from the native oracle.
@@ -74,6 +75,7 @@ library SeiNativeOracleAdapter {
      * @dev Function to get all available exchange rates.
      * @return rates are the latest exchange rates available, converted to uint256.
      * @return denoms are denoms of all the available tokens/exchange rates.
+     * @dev Output is returned in the optimized order.
      */
     function getExchangeRates() internal view returns (uint256[] memory rates, string[] memory denoms) {
         // Retrieve exchange rates in default/string format from the native oracle.
