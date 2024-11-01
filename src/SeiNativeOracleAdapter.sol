@@ -24,7 +24,7 @@ library SeiNativeOracleAdapter {
      * @return rate is the latest exchange rate for the given token/denom.
      * @dev Value of `rate` will be zero in case of an unsupported token/denom.
      */
-    function getExchangeRate(string calldata denom) internal view returns (uint256 rate) {
+    function getExchangeRate(string memory denom) internal view returns (uint256 rate) {
         // Retrieve exchange rates in default/string format from the native oracle.
         ISeiNativeOracle.DenomOracleExchangeRatePair[] memory data = NATIVE_ORACLE.getExchangeRates();
         // Gas opt.
@@ -57,7 +57,7 @@ library SeiNativeOracleAdapter {
      * @dev Function will return zero in case of an unsupported token or missing feed.
      * @dev Output is returned in the optimized order.
      */
-    function getOracleTwap(string calldata denom, uint64 lookbackSeconds) internal view returns (uint256 twap) {
+    function getOracleTwap(string memory denom, uint64 lookbackSeconds) internal view returns (uint256 twap) {
         // Retrieve twap values in the default/string format from the native oracle.
         ISeiNativeOracle.OracleTwap[] memory data = NATIVE_ORACLE.getOracleTwaps(lookbackSeconds);
         // Gas opt.
