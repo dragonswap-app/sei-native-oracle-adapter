@@ -16,32 +16,31 @@ contract SeiNativeOracleAdapterConsumerTest is Test {
         seiNativeOracle = new SeiNativeOracle();
         vm.etch(ORACLE_ADDRESS, address(seiNativeOracle).code);
         seiNativeOracle = SeiNativeOracle(ORACLE_ADDRESS);
-        seiNativeOracle.initialize();
     }
 
-    function test_getExchangeRate() public {
+    function test_getExchangeRate() public view {
         uint256 rate = adapterConsumer.getExchangeRate("usei");
         console.log(rate);
         console.log(adapterConsumer.changeDecimals(rate, 18, 16));
         console.log(adapterConsumer.changeDecimals(rate, 18, 20));
     }
 
-    function test_getExchangeRates() public {
+    function test_getExchangeRates() public view {
         (uint256[] memory rates, string[] memory denoms) = adapterConsumer.getExchangeRates();
         for (uint256 i; i < rates.length; ++i) {
-            console.log(rates[i]);
+            console.log(rates[i], denoms[i]);
         }
     }
 
-    function test_getOracleTwap() public {
+    function test_getOracleTwap() public view {
         uint256 twap = adapterConsumer.getOracleTwap("usei", 10);
         console.log(twap);
     }
 
-    function test_getOracleTwaps() public {
+    function test_getOracleTwaps() public view {
         (uint256[] memory twaps, string[] memory denoms) = adapterConsumer.getOracleTwaps(10);
         for (uint256 i; i < twaps.length; ++i) {
-            console.log(twaps[i]);
+            console.log(twaps[i], denoms[i]);
         }
     }
 }
