@@ -35,7 +35,7 @@ library SeiNativeOracleAdapter {
             // Compare string hashes and proceed once the matching occurs.
             if (keccak256(bytes(pair.denom)) == keccak256(bytes(denom))) {
                 // Conversion of lastUpdate to uint256.
-                uint256 lastUpdate = convertBytesNumberToUint256(bytes(pair.oracleExchangeRateVal.lastUpdate));
+                uint256 lastUpdate = convertStringNumberToUint256(pair.oracleExchangeRateVal.lastUpdate);
                 // 5 block / 10 seconds update tolerance.
                 if (
                     lastUpdate + 5 < block.number
@@ -44,7 +44,7 @@ library SeiNativeOracleAdapter {
                     revert OutdatedExchangeRate();
                 }
                 // Return converted exchange rate.
-                rate = convertBytesNumberToUint256(bytes(pair.oracleExchangeRateVal.exchangeRate));
+                rate = convertStringNumberToUint256(pair.oracleExchangeRateVal.exchangeRate);
             }
         }
     }
@@ -66,7 +66,7 @@ library SeiNativeOracleAdapter {
             // Compare string hashes and proceed once the matching occurs.
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
                 // Return converted twap value.
-                twap = convertBytesNumberToUint256(bytes(data[i].twap));
+                twap = convertStringNumberToUint256(data[i].twap);
             }
         }
     }
@@ -89,7 +89,7 @@ library SeiNativeOracleAdapter {
             // Gas opt.
             ISeiNativeOracle.DenomOracleExchangeRatePair memory pair = data[i];
             // Conversion of lastUpdate to uint256. This flow should change.
-            uint256 lastUpdate = convertBytesNumberToUint256(bytes(pair.oracleExchangeRateVal.lastUpdate));
+            uint256 lastUpdate = convertStringNumberToUint256(pair.oracleExchangeRateVal.lastUpdate);
             // 5 block / 10 seconds update tolerance.
             if (
                 lastUpdate + 5 < block.number
@@ -98,7 +98,7 @@ library SeiNativeOracleAdapter {
                 revert OutdatedExchangeRate();
             }
             // Assign rates and denoms.
-            rates[i] = convertBytesNumberToUint256(bytes(pair.oracleExchangeRateVal.exchangeRate));
+            rates[i] = convertStringNumberToUint256(pair.oracleExchangeRateVal.exchangeRate);
             denoms[i] = pair.denom;
         }
     }
@@ -119,17 +119,19 @@ library SeiNativeOracleAdapter {
         for (uint256 i; i < length; ++i) {
             ISeiNativeOracle.OracleTwap memory twap = data[i];
             // Assign twaps and denoms.
-            twaps[i] = convertBytesNumberToUint256(bytes(twap.twap));
+            twaps[i] = convertStringNumberToUint256(twap.twap);
             denoms[i] = twap.denom;
         }
     }
 
     /**
      * @dev Function to convert numberes represented as byte-strings (mainly exchange rates) into a static uint256 format.
-     * @param bytesNumber is number in bytes dynamic format.
+     * @param stringNumber is number in string (dynamic) format.
      * @return uint256Number is the initial number converted to uint256 static format.
      */
-    function convertBytesNumberToUint256(bytes memory bytesNumber) internal pure returns (uint256 uint256Number) {
+    function convertStringNumberToUint256(string memory stringNumber) internal pure returns (uint256 uint256Number) {
+        // Conversion from string to bytes.
+        bytes memory bytesNumber = bytes(stringNumber);
         // Gas opt.
         uint256 length = bytesNumber.length;
         for (uint256 i; i < length; ++i) {
