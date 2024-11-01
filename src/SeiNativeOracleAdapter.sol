@@ -145,8 +145,7 @@ library SeiNativeOracleAdapter {
      * @param toDecimals is the amount of decimals to be present in the modified representation of the 'number'.
      */
     function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal pure returns (uint256) {
-        // Check if number value representation contains enough decimals. Might remove this check.
-        if (number < 10**fromDecimals) revert();
+        // Compare decimals.
         if (toDecimals > fromDecimals) {
             // Append zeroes.
             number *= 10**(toDecimals - fromDecimals);
