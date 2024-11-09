@@ -133,7 +133,7 @@ library SeiNativeOracleAdapter {
     }
 
     /**
-     * @dev Function to convert numberes represented as byte-strings (mainly exchange rates) into a static uint256 format.
+     * @dev Function to convert numbers represented as byte-strings (mainly exchange rates) into a static uint256 format.
      * @param stringNumber is number in string (dynamic) format.
      * @return uint256Number is the initial number converted to uint256 static format.
      */
@@ -164,7 +164,7 @@ library SeiNativeOracleAdapter {
     function changeDecimals(uint256 number, uint256 fromDecimals, uint256 toDecimals) internal pure returns (uint256) {
         // Compare decimals.
         if (toDecimals > fromDecimals) {
-            // Append zeroes.
+            // Append zeros.
             number *= 10 ** (toDecimals - fromDecimals);
         } else if (fromDecimals > toDecimals) {
             // Trim decimals.
