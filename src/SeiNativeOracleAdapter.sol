@@ -5,12 +5,16 @@ import {ISeiNativeOracle} from "./interfaces/ISeiNativeOracle.sol";
 
 /// @notice Purpose of the adapter is to retrieve available information (string) from the Sei Native Oracle and convert it to usable format (uint256).
 library SeiNativeOracleAdapter {
+    /// @dev Sei Native Oracle exchange rate precision (decimals).
+    uint256 internal constant ORACLE_PRECISION = 18;
+    /// @dev Data recency/freshness limit in blocks.
+    uint256 internal constant DATA_RECENCY_LIMIT_BLOCKS = 5;
+    /// @dev Data recency/freshness limit in seconds.
+    uint256 internal constant DATA_RECENCY_LIMIT_SECONDS = 10;
     /// @dev Sei Native Oracle precompile address.
     address internal constant ORACLE_PRECOMPILE_ADDRESS = 0x0000000000000000000000000000000000001008;
     /// @dev Sei Native Oracle interactive instance.
     ISeiNativeOracle internal constant NATIVE_ORACLE = ISeiNativeOracle(ORACLE_PRECOMPILE_ADDRESS);
-    /// @dev Sei Native Oracle exchange rate precision (decimals).
-    uint256 internal constant ORACLE_PRECISION = 18;
 
     /// @dev Protects from an unexpected character occurrence in exchange rate byte-string.
     error InvalidByte(bytes1 b);
@@ -38,8 +42,8 @@ library SeiNativeOracleAdapter {
                 uint256 lastUpdate = convertStringNumberToUint256(pair.oracleExchangeRateVal.lastUpdate);
                 // 5 block / 10 seconds update tolerance.
                 if (
-                    lastUpdate + 5 < block.number
-                        || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + 10 < block.timestamp
+                    lastUpdate + DATA_RECENCY_LIMIT_BLOCKS < block.number
+                        || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + DATA_RECENCY_LIMIT_SECONDS < block.timestamp
                 ) {
                     revert OutdatedExchangeRate();
                 }
@@ -92,8 +96,8 @@ library SeiNativeOracleAdapter {
             uint256 lastUpdate = convertStringNumberToUint256(pair.oracleExchangeRateVal.lastUpdate);
             // 5 block / 10 seconds update tolerance.
             if (
-                lastUpdate + 5 < block.number
-                    || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + 10 < block.timestamp
+                lastUpdate + DATA_RECENCY_LIMIT_BLOCKS < block.number
+                    || uint256(uint64(pair.oracleExchangeRateVal.lastUpdateTimestamp)) + DATA_RECENCY_LIMIT_SECONDS < block.timestamp
             ) {
                 revert OutdatedExchangeRate();
             }
