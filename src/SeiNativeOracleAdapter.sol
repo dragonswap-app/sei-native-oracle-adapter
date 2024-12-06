@@ -48,7 +48,7 @@ library SeiNativeOracleAdapter {
                     revert OutdatedExchangeRate();
                 }
                 // Return converted exchange rate.
-                rate = convertStringNumberToUint256(pair.oracleExchangeRateVal.exchangeRate);
+                return convertStringNumberToUint256(pair.oracleExchangeRateVal.exchangeRate);
             }
         }
     }
@@ -70,7 +70,7 @@ library SeiNativeOracleAdapter {
             // Compare string hashes and proceed once the matching occurs.
             if (keccak256(bytes(data[i].denom)) == keccak256(bytes(denom))) {
                 // Return converted twap value.
-                twap = convertStringNumberToUint256(data[i].twap);
+                return convertStringNumberToUint256(data[i].twap);
             }
         }
     }
