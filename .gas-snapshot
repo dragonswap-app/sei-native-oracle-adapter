@@ -1,5 +1,5 @@
-SeiNativeOracleAdapterTest:test_changeDecimals() (gas: 30242)
-SeiNativeOracleAdapterTest:test_getExchangeRate() (gas: 29848)
+SeiNativeOracleAdapterTest:test_changeDecimals() (gas: 29685)
+SeiNativeOracleAdapterTest:test_getExchangeRate() (gas: 29291)
 SeiNativeOracleAdapterTest:test_getExchangeRates() (gas: 53576)
-SeiNativeOracleAdapterTest:test_getOracleTwap() (gas: 25209)
+SeiNativeOracleAdapterTest:test_getOracleTwap() (gas: 24685)
 SeiNativeOracleAdapterTest:test_getOracleTwaps() (gas: 47719)
