@@ -1,6 +1,6 @@
 # Sei Native Oracle Adapter Library
-![npm version](https://img.shields.io/npm/v/sei-native-oracle-adapter)
 ![unit tests](https://github.com/dragonswap-app/sei-native-oracle-adapter/actions/workflows/test.yml/badge.svg)
+[![npm version](https://img.shields.io/npm/v/sei-native-oracle-adapter)](https://www.npmjs.org/package/sei-native-oracle-adapter)
 
 A library that enables an out-of-the-box utilization of the Sei Native Oracle though the Solidity smart-contracts.
 The Sei Native Oracle returns 18 decimal fixed point numbers in a `string` format (which is usually not directly usable), and this library helps you easily retrieve exchange rates in `uint256` format with a manageable amount decimals.
